@@ -1,0 +1,4 @@
+repository "RecreateGames@ssl://sc7286@sh03-plasticscm.unity.cn:8787"
+  path "/"
+    smartbranch "/main/sc7286" 
+     
