@@ -41,17 +41,17 @@ public class SpotShadowMeshGenerator : MonoBehaviour
     private void Update() 
     {
         //only update mesh when player is under the spot light
-        if(myPlayerController.UnderSpotLight)
-        {
-            myMR.enabled = true;
+        // if(myPlayerController.UnderSpotLight)
+        // {
+        //     myMR.enabled = true;
 
-            CreateShape();
-            UpdateMesh();
-        }
-        else
-        {
-            myMR.enabled = false;
-        }
+        //     CreateShape();
+        //     UpdateMesh();
+        // }
+        // else
+        // {
+        //     myMR.enabled = false;
+        // }
     }
 
     private void CreateShape()

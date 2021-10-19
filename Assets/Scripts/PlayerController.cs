@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
         set
         {
             score = value;
-            teamManager.UpdateScore();
+            if(score > 10) score = 10;
         }
     }
 
@@ -28,8 +28,16 @@ public class PlayerController : MonoBehaviour
         set
         {
             flashLightOn = value;
-            if(flashLightOn) flashLight.enabled = true;
-            else flashLight.enabled = false;
+            if(flashLightOn) 
+            {
+                flashLight.enabled = true;
+                flashLight.gameObject.layer = LayerMask.NameToLayer("Light");
+            }
+            else 
+            {
+                flashLight.enabled = false;
+                flashLight.gameObject.layer = LayerMask.NameToLayer("Default");
+            }
         }
     }
     [SerializeField] private Light flashLight;
@@ -55,8 +63,8 @@ public class PlayerController : MonoBehaviour
     public float Height;
     public float Width;
 
-    public bool UnderSpotLight = false;
-    public bool InShadow;//one shadow may be consisted of more than one collider, but score can only be calculated once
+    public bool UnderLight = false;
+
 
     [SerializeField] private float moveSpeed;
     [SerializeField] private float rotationSpeed;
@@ -72,9 +80,11 @@ public class PlayerController : MonoBehaviour
 
     private TeamManager teamManager;
 
+    private MeshRenderer myMR;
     private void Start() 
     {
         myRB = GetComponent<Rigidbody>();
+        myMR = GetComponent<MeshRenderer>();
         playerInput = GetComponent<PlayerInput>();
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.Enable();
@@ -86,7 +96,7 @@ public class PlayerController : MonoBehaviour
 
     }
     private void Update() 
-    {
+    {        
         if(isMoving)
         {
             Vector2 input = playerInputActions.Player.Movement.ReadValue<Vector2>();
@@ -114,6 +124,16 @@ public class PlayerController : MonoBehaviour
         {
             LightCollection -= 8 * Time.deltaTime;
         }
+
+        if(UnderLight)
+        {
+            myMR.material.color = Color.red;
+            LightCollection += 2 * Time.deltaTime;
+        }
+        else
+        {
+            myMR.material.color = Color.green;
+        }
     }
 
     public void OnCollisionEnter(Collision collision)
@@ -128,17 +148,19 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) 
     {
-        if(other.gameObject.CompareTag("SpotLight"))
+        if(other.gameObject.CompareTag("Trigger"))
         {
-            UnderSpotLight = true;
+            teamManager.SolarArray[TeamIndex].Acceleration += 1;
         }
     }
 
+
     private void OnTriggerExit(Collider other) 
     {
-        if(other.gameObject.CompareTag("SpotLight"))
+        //more players in the trigger do more acceleration
+        if(other.gameObject.CompareTag("Trigger"))
         {
-            UnderSpotLight = false;
+            teamManager.SolarArray[TeamIndex].Acceleration -= 1;
         }
     }
 

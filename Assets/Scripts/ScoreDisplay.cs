@@ -17,7 +17,7 @@ public class ScoreDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-                Debug.Log("Team Index = " + playerController.TeamIndex);
+        Debug.Log("Team Index = " + playerController.TeamIndex);
 
         teamManager = GameObject.Find("/Managers").GetComponent<TeamManager>();
 
@@ -30,7 +30,7 @@ public class ScoreDisplay : MonoBehaviour
     void Update()
     {
         playerTMP.text = "Player" + playerController.Index + " Score = " + playerController.Score;
-        teamTMP.text = "Team" + teamManager.TeamScore[playerController.TeamIndex];
+        teamTMP.text = "Team" + teamManager.TeamScoreArray[playerController.TeamIndex];
 
     }
 }
