@@ -6,20 +6,31 @@ using UnityEngine;
 public class ScoreDisplay : MonoBehaviour
 {
     [SerializeField] private PlayerController playerController;
-    private TextMeshProUGUI myTMP;
+    private TeamManager teamManager;
+
+
+    [SerializeField] private TextMeshProUGUI playerTMP;
+    [SerializeField] private TextMeshProUGUI teamTMP;
+
 
     
     // Start is called before the first frame update
     void Start()
     {
-        myTMP = GetComponent<TextMeshProUGUI>();
+                Debug.Log("Team Index = " + playerController.TeamIndex);
 
-        myTMP.text = "Player" + playerController.Idx + " Score = " + playerController.Score;
+        teamManager = GameObject.Find("/Managers").GetComponent<TeamManager>();
+
+        playerTMP.text = "Player" + playerController.Index + " Score = 0";
+        teamTMP.text = "Team0 Score = 0";
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        myTMP.text = "Player" + playerController.Idx + " Score = " + playerController.Score;
+        playerTMP.text = "Player" + playerController.Index + " Score = " + playerController.Score;
+        teamTMP.text = "Team" + teamManager.TeamScore[playerController.TeamIndex];
+
     }
 }

@@ -1,13 +1,57 @@
-﻿using System.Runtime.CompilerServices;
+﻿using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 
 public class PlayerController : MonoBehaviour
 {    
     //self properties
-    public int Idx;
-    public int Score;
+    public int Index;
+    public int TeamIndex;
+
+    private int score;
+    public int Score
+    {
+        get{ return score;}
+        set
+        {
+            score = value;
+            teamManager.UpdateScore();
+        }
+    }
+
+    private bool flashLightOn;
+    public bool FlashLightOn
+    {
+        get{ return flashLightOn;}
+        set
+        {
+            flashLightOn = value;
+            if(flashLightOn) flashLight.enabled = true;
+            else flashLight.enabled = false;
+        }
+    }
+    [SerializeField] private Light flashLight;
+
+    private float lightCollection;
+    public float LightCollection
+    {
+        get{ return lightCollection;}
+        set
+        {
+            if(value >= 100f) lightCollection = 100f;
+            else if(value <= 0f) 
+            {
+                lightCollection = 0f;
+                FlashLightOn = false;
+            }
+            else lightCollection = value;
+        }
+    }
+
+    [SerializeField] private Image lightUI;
+
     public float Height;
     public float Width;
 
@@ -26,6 +70,7 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded = true;
     [SerializeField] private float maxSpeed;
 
+    private TeamManager teamManager;
 
     private void Start() 
     {
@@ -33,6 +78,11 @@ public class PlayerController : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.Enable();
+
+        // flashLight = GetComponentInChildren<Light>();
+        FlashLightOn = false;
+
+        teamManager = GameObject.Find("/Managers").GetComponent<TeamManager>();
 
     }
     private void Update() 
@@ -54,6 +104,15 @@ public class PlayerController : MonoBehaviour
             Quaternion toRotation = Quaternion.LookRotation(move, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
 
+        }
+
+        //set light collection bar
+        if(lightUI != null) lightUI.fillAmount = lightCollection / 100f;
+
+        //reduce light collection if flashlight is on
+        if(flashLightOn == true)
+        {
+            LightCollection -= 8 * Time.deltaTime;
         }
     }
 
@@ -98,6 +157,12 @@ public class PlayerController : MonoBehaviour
             myRB.AddForce(Vector3.up * 6f, ForceMode.Impulse);
 
         }
+    }
+
+    public void FlashLight(InputAction.CallbackContext context)
+    {
+        if(context.performed && lightCollection == 100f)  FlashLightOn = true;
+
     }
 
 }

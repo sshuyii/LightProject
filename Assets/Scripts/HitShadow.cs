@@ -16,7 +16,7 @@ public class HitShadow : MonoBehaviour
                 pc.Score ++;
                 pc.InShadow = true;
 
-                Debug.Log("Player " + pc.Idx + " hit the shadow of Player " + myPlayerController.Idx);
+                Debug.Log("Player " + pc.Index + " hit the shadow of Player " + myPlayerController.Index);
             }
         }
     }

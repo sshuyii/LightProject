@@ -176,7 +176,7 @@ RectTransform:
   m_Children:
   - {fileID: 6693987708223202333}
   m_Father: {fileID: 6484331689805773945}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -385,7 +385,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8431456062583102682
 Transform:
   m_ObjectHideFlags: 0
@@ -401,7 +401,7 @@ Transform:
   - {fileID: 8328055238538225782}
   - {fileID: 1466165220774762370}
   m_Father: {fileID: 6484331689805773945}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3790863163561303213
 GameObject:
@@ -619,10 +619,11 @@ GameObject:
   - component: {fileID: 6484331689805773946}
   - component: {fileID: 6484331689805773947}
   - component: {fileID: 1979854646105084156}
+  - component: {fileID: 6637061604015557669}
   - component: {fileID: 6484331689805773944}
   - component: {fileID: 9160045030270666755}
   - component: {fileID: 3963741085718295987}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -641,6 +642,7 @@ Transform:
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_Children:
   - {fileID: 2057231178535685425}
+  - {fileID: 4694098561630201981}
   - {fileID: 8431456062583102682}
   - {fileID: 5924856108842838376}
   m_Father: {fileID: 0}
@@ -707,14 +709,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 665801b19b818459c95e98d2cec3e263, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Idx: 0
-  Score: 0
+  Index: 0
+  TeamIdx: 0
+  flashLight: {fileID: 4694098561125491036}
+  lightUI: {fileID: 0}
   Height: 2
   Width: 1
-  underSpotLight: 0
-  moveSpeed: 20
+  UnderSpotLight: 0
+  InShadow: 0
+  moveSpeed: 30
   rotationSpeed: 400
   maxSpeed: 4
+--- !u!114 &6637061604015557669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6484331689805773950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 114f511d5d4024884ac5bacca184f52d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myObjectType: 0
 --- !u!114 &6484331689805773944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -773,6 +791,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 1698d6cb-35fd-47c4-9184-d57bb01318a2
     m_ActionName: Player/Movement[/Keyboard/w,/Keyboard/z,/Keyboard/a,/Keyboard/d,/DualShock4GamepadHID/leftStick]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1979854646105084156}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: FlashLight
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: aad6f089-1432-4932-9ef1-430403333ff4
+    m_ActionName: Player/FlashLight[/DualShock4GamepadHID/buttonNorth,/Keyboard/f]
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1050,3 +1084,84 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1001 &1190364718522785269
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 6484331689805773945}
+    m_Modifications:
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882210886807369097, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+        type: 3}
+      propertyPath: m_Name
+      value: Spot Light
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f7db2e108e0ec4668979e0fc0c37a5c9, type: 3}
+--- !u!108 &4694098561125491036 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 5882210886306495657, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+    type: 3}
+  m_PrefabInstance: {fileID: 1190364718522785269}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4694098561630201981 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5882210886807369096, guid: f7db2e108e0ec4668979e0fc0c37a5c9,
+    type: 3}
+  m_PrefabInstance: {fileID: 1190364718522785269}
+  m_PrefabAsset: {fileID: 0}
