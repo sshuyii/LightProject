@@ -16,9 +16,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpSpeed;
     [HideInInspector] public bool UnderLight = false;
     [HideInInspector] public bool Umbrellable = false;
+    [HideInInspector] public bool Invincible = false;
+
     private Vector3 initialPosition;
     private bool isMoving;
     private bool isGrounded = true;
+
     
 
     [Header("References")]
@@ -37,7 +40,7 @@ public class PlayerController : MonoBehaviour
    
     private PlayerInput playerInput;
     private PlayerInputActions playerInputActions;
-  
+    
 
     private int score;
     public int Score
@@ -203,12 +206,16 @@ public class PlayerController : MonoBehaviour
     
     public void Dead()
     {
-        for(int i = 0; i < Score; i++)
+        if(!Invincible)
         {
-            Instantiate(itemPrefab, transform.position, Quaternion.identity);
-        }
+            for(int i = 0; i < Score; i++)
+            {
+                Instantiate(itemPrefab, transform.position, Quaternion.identity);
+            }
 
-        Reset();
+            Reset();        
+        }
+       
     }
 
     private void Reset()
@@ -264,6 +271,7 @@ public class PlayerController : MonoBehaviour
         {
             Umbrella.GetComponent<ItemTimer>().Reset();
             Umbrellable = false;
+            Invincible = true;
 
             Debug.Log("Umbrealla unfold");
         }

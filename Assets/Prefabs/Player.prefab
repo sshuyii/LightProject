@@ -93,6 +93,7 @@ GameObject:
   - component: {fileID: 7068846074961547377}
   - component: {fileID: 6139006271700541912}
   - component: {fileID: 979614032791488798}
+  - component: {fileID: 8576577295088144754}
   m_Layer: 6
   m_Name: Umbrella
   m_TagString: Untagged
@@ -108,7 +109,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2456866595081452388}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 3, y: 0.1, z: 3}
   m_Children: []
   m_Father: {fileID: 6484331689805773945}
@@ -176,6 +177,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeLength: 10
+--- !u!114 &8576577295088144754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2456866595081452388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 909715d77984f43b19057910888a1a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4694098561125491033
 GameObject:
   m_ObjectHideFlags: 0
@@ -386,19 +399,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Index: 0
   TeamIndex: 0
-  flashLight: {fileID: 4694098561125491036}
-  lightUI: {fileID: 0}
-  Height: 2
-  Width: 1
-  UnderLight: 0
-  Umbrella: {fileID: 2456866595081452388}
-  Umbrellable: 0
   moveSpeed: 300
   rotationSpeed: 400
   maxSpeed: 5
   jumpSpeed: 120
+  UnderLight: 0
+  Umbrellable: 0
+  Invincible: 0
+  flashLight: {fileID: 4694098561125491036}
+  Umbrella: {fileID: 2456866595081452388}
   itemPrefab: {fileID: 2747023103788595536, guid: e32eec2d919ce44ba9aae568f0b7ac54,
     type: 3}
+  lightUI: {fileID: 0}
 --- !u!114 &6637061604015557669
 MonoBehaviour:
   m_ObjectHideFlags: 0

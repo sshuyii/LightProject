@@ -6,7 +6,7 @@ using UnityEngine;
 public class ElevatorController : MonoBehaviour
 {
     [SerializeField] private float maxHeight;
-    [SerializeField] float speed;
+    [SerializeField] private float speed;
 
     private float initialHeight;
 

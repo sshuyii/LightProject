@@ -2,46 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ObjectType
+{
+    Player,
+    Item,
+    Battery,
+    Solar,
+    Umbrella
+}
 
 public class ShadowDetector : MonoBehaviour
 {
-    public enum ObjectType
-    {
-        Player,
-        Item,
-        Battery,
-        Solar,
-        Umbrella
-    }
-
+   
+    //properties
     public ObjectType myObjectType;
-    private GameObject light;
-    private MeshRenderer myMesh;
-    private RaycastHit hit;
-
     public bool UnderDirLight = false;
     public bool UnderSpotLight = false;
-
     private bool hitByPlayer = false;
-
-
     private Vector3 objectBottom;
+    private float height;
+
+
+    //references
+    private MeshRenderer myMesh;
+    private MeshRenderer myMR;
+
+    private RaycastHit hit;
+    private GameObject sunLight;
 
     private PlayerController myPC;
     private ElevatorController myElevator;
     private SolarController mySolar;
-
-    private MeshRenderer myMR;
-
     private LevelManager levelManager;
 
-    private float height;
      
      // Use this for initialization
     void Start () 
     {
 
-        light = GameObject.Find("Lights/Directional Light");
+        sunLight = GameObject.Find("Lights/Directional Light");
         levelManager = GameObject.Find("Managers").GetComponent<LevelManager>();
 
         myMR = GetComponent<MeshRenderer>();
@@ -72,7 +71,7 @@ public class ShadowDetector : MonoBehaviour
 
         //check whether this gameObject is under directional light
         UnderDirLight = false;
-        Vector3 sunDir = light.transform.forward;
+        Vector3 sunDir = sunLight.transform.forward;
 
         // Debug.Log("sun direction = " + sunDir );
         sunDir.Normalize();
@@ -80,15 +79,15 @@ public class ShadowDetector : MonoBehaviour
     
         Debug.DrawLine(objectBottom, objectBottom - sunDir, Color.red);
 
-        if (!Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Wall"))
-            && !Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player")))
+        if (!Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Wall")))
         {
-           UnderDirLight = true;
-        }
-        if(Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player"))
-            && hit.transform.GetComponent<PlayerController>().UnderLight)
-        {
-            hitByPlayer = true;
+            if(!Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player")))
+            {
+                UnderDirLight = true;
+
+            }
+            else hitByPlayer = true;
+
         }
 
         //detect whether this gameObject is in the shadow of any spotlight
@@ -107,16 +106,13 @@ public class ShadowDetector : MonoBehaviour
 
                 Debug.DrawLine(objectBottom, objectBottom - playerToLight, Color.yellow);
 
-                if (!Physics.Raycast(objectBottom, - playerToLight, out hit, 30, LayerMask.GetMask("Wall"))
-                    && !Physics.Raycast(objectBottom, - playerToLight, out hit, 30, LayerMask.GetMask("Player")))
+                if (!Physics.Raycast(objectBottom, - playerToLight, out hit, 30, LayerMask.GetMask("Wall")))
                 {
-                    UnderSpotLight = true;
-                }
-
-                if(Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player"))
-                    && hit.transform.GetComponent<PlayerController>().UnderLight)
-                {
-                    hitByPlayer = true;
+                    if(!Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player")))
+                    {
+                        UnderSpotLight = true;
+                    }
+                    else hitByPlayer = true;
                 }
             }
         }
@@ -159,8 +155,9 @@ public class ShadowDetector : MonoBehaviour
                         PlayerController pc = hit.transform.GetComponent<PlayerController>();
                         Debug.Log("Player" + pc.Index + " collect this item");
 
-                        //player can only pick up items when the items are under light                        {
-                        if(pc.Score < 10)
+                        //player can only pick up items when the items are under light
+                        //and the umbrella is folded
+                        if(pc.Score < 10 && !pc.Invincible)
                         {
                             //increase player score
                             pc.Score++;
