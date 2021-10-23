@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -10,27 +8,25 @@ public class ScoreDisplay : MonoBehaviour
 
 
     [SerializeField] private TextMeshProUGUI playerTMP;
-    [SerializeField] private TextMeshProUGUI teamTMP;
-
+    [SerializeField] private TextMeshProUGUI teamTMP0;
+    [SerializeField] private TextMeshProUGUI teamTMP1;
+    [SerializeField] private CanvasGroup umbrella;
 
     
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Team Index = " + playerController.TeamIndex);
-
         teamManager = GameObject.Find("/Managers").GetComponent<TeamManager>();
-
-        playerTMP.text = "Player" + playerController.Index + " Score = 0";
-        teamTMP.text = "Team0 Score = 0";
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        playerTMP.text = "Player" + playerController.Index + " Score = " + playerController.Score;
-        teamTMP.text = "Team" + teamManager.TeamScoreArray[playerController.TeamIndex];
+        playerTMP.text = playerController.Score.ToString();
+        teamTMP0.text = Mathf.RoundToInt(teamManager.TeamScoreArray[0]).ToString();
+        teamTMP1.text = Mathf.RoundToInt(teamManager.TeamScoreArray[1]).ToString();
 
+        if(playerController.Umbrellable) umbrella.alpha = 1;
+        else umbrella.alpha = 0;
     }
 }

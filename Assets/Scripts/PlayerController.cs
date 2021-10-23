@@ -1,14 +1,43 @@
 ﻿using UnityEditor.EditorTools;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 
 public class PlayerController : MonoBehaviour
 {    
-    //self properties
+    [Header("Self Properties")]
     public int Index;
     public int TeamIndex;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float rotationSpeed;
+    [SerializeField] private float maxSpeed;
+    [SerializeField] private float jumpSpeed;
+    [HideInInspector] public bool UnderLight = false;
+    [HideInInspector] public bool Umbrellable = false;
+    private Vector3 initialPosition;
+    private bool isMoving;
+    private bool isGrounded = true;
+    
+
+    [Header("References")]
+    [SerializeField] private Light flashLight;
+    [SerializeField] private GameObject Umbrella;
+    [SerializeField] private GameObject itemPrefab;
+
+    private Rigidbody myRB;
+    private MeshRenderer myMR;
+    private TeamManager teamManager;
+
+
+    [Header("UI")]
+    [SerializeField] private Image lightUI;
+    
+   
+    private PlayerInput playerInput;
+    private PlayerInputActions playerInputActions;
+  
 
     private int score;
     public int Score
@@ -17,7 +46,12 @@ public class PlayerController : MonoBehaviour
         set
         {
             score = value;
-            if(score > 10) score = 10;
+            if(score >= 10) score = 10;
+            else if(score <= 0) 
+            {
+                score = 0;
+                Throwable = false;
+            }
         }
     }
 
@@ -40,7 +74,6 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    [SerializeField] private Light flashLight;
 
     private float lightCollection;
     public float LightCollection
@@ -58,49 +91,46 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    [SerializeField] private Image lightUI;
+  
+    private bool throwable;
+    public bool Throwable
+    {
+        get{ return throwable;}
+        set
+        {
+            throwable = value;
+            if(Score == 0) throwable = false;
+        }
+    }
 
-    public float Height;
-    public float Width;
 
-    public bool UnderLight = false;
-
-
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float rotationSpeed;
-    
-    
-
-    private Rigidbody myRB;
-    private PlayerInput playerInput;
-    private PlayerInputActions playerInputActions;
-    private bool isMoving;
-    private bool isGrounded = true;
-    [SerializeField] private float maxSpeed;
-
-    private TeamManager teamManager;
-
-    private MeshRenderer myMR;
     private void Start() 
     {
         myRB = GetComponent<Rigidbody>();
         myMR = GetComponent<MeshRenderer>();
         playerInput = GetComponent<PlayerInput>();
+
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.Enable();
 
-        // flashLight = GetComponentInChildren<Light>();
-        FlashLightOn = false;
-
+        Umbrella.GetComponent<MeshRenderer>().enabled = false;
         teamManager = GameObject.Find("/Managers").GetComponent<TeamManager>();
 
+        initialPosition = transform.position;
+
+        Reset();
     }
+
     private void Update() 
     {        
         if(isMoving)
         {
             Vector2 input = playerInputActions.Player.Movement.ReadValue<Vector2>();
             Vector3 move = new Vector3(input.x, 0, input.y);
+            Vector3 camDir = Camera.main.transform.forward;
+        
+            move = Camera.main.transform.TransformDirection(move);
+            move = new Vector3(move.x, 0, move.z);
 
             myRB.AddForce(move * moveSpeed, ForceMode.Force);   
 
@@ -110,7 +140,7 @@ public class PlayerController : MonoBehaviour
                 myRB.velocity = myRB.velocity.normalized * maxSpeed;
             }
 
-            //rotate to moving direction
+            //rotate to camera forword direction
             Quaternion toRotation = Quaternion.LookRotation(move, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
 
@@ -120,20 +150,15 @@ public class PlayerController : MonoBehaviour
         if(lightUI != null) lightUI.fillAmount = lightCollection / 100f;
 
         //reduce light collection if flashlight is on
-        if(flashLightOn == true)
-        {
-            LightCollection -= 8 * Time.deltaTime;
-        }
+        if(FlashLightOn == true) LightCollection -= 8 * Time.deltaTime;
 
         if(UnderLight)
         {
-            myMR.material.color = Color.red;
+            myMR.material.color = Color.green;
             LightCollection += 2 * Time.deltaTime;
         }
-        else
-        {
-            myMR.material.color = Color.green;
-        }
+        else myMR.material.color = Color.black;
+
     }
 
     public void OnCollisionEnter(Collision collision)
@@ -150,7 +175,15 @@ public class PlayerController : MonoBehaviour
     {
         if(other.gameObject.CompareTag("Trigger"))
         {
-            teamManager.SolarArray[TeamIndex].Acceleration += 1;
+            teamManager.SolarArray[TeamIndex].AccelerationArea(true);
+        }
+        else if(other.gameObject.CompareTag("Solar"))
+        {
+            if(Score > 0) Throwable = true;
+        }
+        else if(other.gameObject.CompareTag("Dead"))
+        {
+            Dead();
         }
     }
 
@@ -160,8 +193,34 @@ public class PlayerController : MonoBehaviour
         //more players in the trigger do more acceleration
         if(other.gameObject.CompareTag("Trigger"))
         {
-            teamManager.SolarArray[TeamIndex].Acceleration -= 1;
+            teamManager.SolarArray[TeamIndex].AccelerationArea(false);
         }
+        else if(other.gameObject.CompareTag("Solar"))
+        {
+            Throwable = false;
+        }
+    }
+    
+    public void Dead()
+    {
+        for(int i = 0; i < Score; i++)
+        {
+            Instantiate(itemPrefab, transform.position, Quaternion.identity);
+        }
+
+        Reset();
+    }
+
+    private void Reset()
+    {
+        FlashLightOn = false;
+        Throwable = false;
+        Score = 0;
+        LightCollection = 0;
+        Umbrellable = false;
+
+        transform.position = initialPosition;
+        
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -174,16 +233,40 @@ public class PlayerController : MonoBehaviour
     {
         if(context.performed && isGrounded)
         {                    
-            Debug.Log(context);
+            // Debug.Log(context);
             Debug.Log("Jump");
-            myRB.AddForce(Vector3.up * 6f, ForceMode.Impulse);
-
+            myRB.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
         }
     }
 
     public void FlashLight(InputAction.CallbackContext context)
     {
-        if(context.performed && lightCollection == 100f)  FlashLightOn = true;
+        if(context.performed)
+        {
+            FlashLightOn = !FlashLightOn;
+        }
+    }
+
+    public void Throw(InputAction.CallbackContext context)
+    {
+        //throw item onto solar system
+        if(context.performed && Throwable)  
+        {
+            Score--;
+            teamManager.ItemCountArray[TeamIndex] ++;
+        }
+    }
+
+    public void Item(InputAction.CallbackContext context)
+    {
+        //unfold umbrella
+        if(context.performed && Umbrellable)  
+        {
+            Umbrella.GetComponent<ItemTimer>().Reset();
+            Umbrellable = false;
+
+            Debug.Log("Umbrealla unfold");
+        }
 
     }
 

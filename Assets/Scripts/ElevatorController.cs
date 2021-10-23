@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class ElevatorController : MonoBehaviour
 {
-    [SerializeField] float maxHeight;
+    [SerializeField] private float maxHeight;
     [SerializeField] float speed;
 
-    [SerializeField] private float initialHeight;
+    private float initialHeight;
 
 
     private bool underSun;

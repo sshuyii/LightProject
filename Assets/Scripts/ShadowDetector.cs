@@ -10,15 +10,20 @@ public class ShadowDetector : MonoBehaviour
         Player,
         Item,
         Battery,
-        Solar
+        Solar,
+        Umbrella
     }
 
     public ObjectType myObjectType;
     private GameObject light;
-    private MeshRenderer mesh;
+    private MeshRenderer myMesh;
     private RaycastHit hit;
 
-    private bool underLight = false;
+    public bool UnderDirLight = false;
+    public bool UnderSpotLight = false;
+
+    private bool hitByPlayer = false;
+
 
     private Vector3 objectBottom;
 
@@ -26,16 +31,21 @@ public class ShadowDetector : MonoBehaviour
     private ElevatorController myElevator;
     private SolarController mySolar;
 
+    private MeshRenderer myMR;
+
+    private LevelManager levelManager;
 
     private float height;
      
      // Use this for initialization
     void Start () 
     {
-        mesh = GetComponent<MeshRenderer>();
 
         light = GameObject.Find("Lights/Directional Light");
-        myPC = GetComponent<PlayerController>();
+        levelManager = GameObject.Find("Managers").GetComponent<LevelManager>();
+
+        myMR = GetComponent<MeshRenderer>();
+        myMesh = GetComponent<MeshRenderer>();
 
         height = transform.localScale.y;
 
@@ -45,21 +55,26 @@ public class ShadowDetector : MonoBehaviour
         }
         else if(myObjectType == ObjectType.Solar)
         {
-            mySolar = GetComponent<SolarController>();
+            mySolar = transform.parent.GetComponent<SolarController>();
+        }
+        else if(myObjectType == ObjectType.Player)
+        {
+            myPC = GetComponent<PlayerController>();
         }
     }
      
     // Update is called once per frame
     void Update () 
     {
+        hitByPlayer = false;
+
         objectBottom = new Vector3(transform.position.x, transform.position.y - height/2, transform.position.z);
 
-
         //check whether this gameObject is under directional light
-        underLight = false;
+        UnderDirLight = false;
         Vector3 sunDir = light.transform.forward;
 
-        Debug.Log("sun direction = " + sunDir );
+        // Debug.Log("sun direction = " + sunDir );
         sunDir.Normalize();
         sunDir *= 100;
     
@@ -68,13 +83,17 @@ public class ShadowDetector : MonoBehaviour
         if (!Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Wall"))
             && !Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player")))
         {
-            if(hit.transform != transform) underLight = true;
+           UnderDirLight = true;
+        }
+        if(Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player"))
+            && hit.transform.GetComponent<PlayerController>().UnderLight)
+        {
+            hitByPlayer = true;
         }
 
-        CheckUnderShadow(- sunDir);
-
-
         //detect whether this gameObject is in the shadow of any spotlight
+        //spot light is optional
+        UnderSpotLight = false;
 
         Collider[] spotLights = Physics.OverlapSphere(transform.position, 5f, LayerMask.GetMask("Light"));
         if(spotLights.Length > 0)
@@ -82,7 +101,7 @@ public class ShadowDetector : MonoBehaviour
             foreach(Collider c in spotLights)
             {
                 Vector3 playerToLight = transform.position - c.transform.position;
-                Debug.Log("player to light direction = " + playerToLight );
+                // Debug.Log("player to light direction = " + playerToLight );
                 playerToLight.Normalize();
                 playerToLight *= 100;
 
@@ -91,63 +110,70 @@ public class ShadowDetector : MonoBehaviour
                 if (!Physics.Raycast(objectBottom, - playerToLight, out hit, 30, LayerMask.GetMask("Wall"))
                     && !Physics.Raycast(objectBottom, - playerToLight, out hit, 30, LayerMask.GetMask("Player")))
                 {
-                     if(hit.transform != transform) underLight = true;
+                    UnderSpotLight = true;
                 }
 
-                CheckUnderShadow(playerToLight);
+                if(Physics.Raycast(objectBottom, - sunDir, out hit, 30, LayerMask.GetMask("Player"))
+                    && hit.transform.GetComponent<PlayerController>().UnderLight)
+                {
+                    hitByPlayer = true;
+                }
             }
         }
 
-        
+        NotifyObject();
+
     }
 
-    private void CheckUnderShadow(Vector3 dir)
+    //todo: use event system, this script should only be used to trigger relevant event
+    private void NotifyObject()
     {
         switch (myObjectType)
         {
             case ObjectType.Player:
-                PlayerController thisPlayer = transform.GetComponent<PlayerController>();
 
-                if(Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Player"))
-                    || Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Wall")))
-                {         
-                    if(hit.transform != transform)
+                if(!UnderSpotLight && !UnderDirLight)
+                {
+                    myPC.UnderLight = false;
+
+                    if(hitByPlayer)
                     {
-                        thisPlayer.UnderLight = false;
-                        Debug.Log("Player" + thisPlayer.Index + " is under shadow");
+                        //detect whether the player is under the shadow of wall or other player
+                        PlayerController losePlayer = hit.transform.GetComponent<PlayerController>();
+                        losePlayer.Dead();
 
-                        if(Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Player")))
-                        {
-                            //detect whether the player is under the shadow of wall or other player
-                            PlayerController losePlayer = hit.transform.GetComponent<PlayerController>();
-
-                            Debug.Log("Player" + thisPlayer.Index + " hit Player" + losePlayer.Index);
-                        }
-                    } 
+                        Debug.Log("Player" + myPC.Index + " hit Player" + losePlayer.Index);
+                    }
                 }
                 else
                 {
-                    thisPlayer.UnderLight = true;
+                    myPC.UnderLight = true;
                 }
                 break;
 
             case ObjectType.Item:
-                if(Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Player")))
+                if(!UnderSpotLight && !UnderDirLight)
                 {
-                    int player = hit.transform.GetComponent<PlayerController>().Index;
-                    Debug.Log("Player" + player + " collect this item");
+                    if(hitByPlayer && myMR.enabled)
+                    {
+                        PlayerController pc = hit.transform.GetComponent<PlayerController>();
+                        Debug.Log("Player" + pc.Index + " collect this item");
 
-                    //increase player score
-                    hit.transform.GetComponent<PlayerController>().Score++;
+                        //player can only pick up items when the items are under light                        {
+                        if(pc.Score < 10)
+                        {
+                            //increase player score
+                            pc.Score++;
 
-                    //this item should disappear if it is picked up
-                    gameObject.SetActive(false);
+                            //this item should disappear if it is picked up
+                            myMR.enabled = false;
+                        }
+                    } 
                 }
                 break;
             
             case ObjectType.Battery:
-                if(Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Player"))
-                    || Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Wall")))
+                if(!UnderDirLight && !UnderSpotLight)
                 {
                     myElevator.UnderLight = false;
                     Debug.Log("Battery is in the shadow");
@@ -160,9 +186,8 @@ public class ShadowDetector : MonoBehaviour
                 }
                 break;
                 
-             case ObjectType.Solar:
-                if(Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Player"))
-                    || Physics.Raycast(objectBottom, dir, out hit, 30, LayerMask.GetMask("Wall")))
+            case ObjectType.Solar:
+                if(!UnderDirLight && !UnderSpotLight)
                 {
                     mySolar.UnderLight = false;
                     Debug.Log("Solar system is in the shadow");
@@ -174,6 +199,21 @@ public class ShadowDetector : MonoBehaviour
 
                 }
                 break;
+            case ObjectType.Umbrella:
+                if(!UnderSpotLight && !UnderDirLight)
+                {
+                    if(hitByPlayer)                         
+                    {
+                        PlayerController pc = hit.transform.GetComponent<PlayerController>();
+
+                        //this item should disappear if it is picked up
+                        myMR.enabled = false;
+
+                        pc.Umbrellable = true;
+                    }
+                }
+                break;
+
         }
     }
 }

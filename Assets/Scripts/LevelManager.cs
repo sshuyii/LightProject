@@ -8,14 +8,18 @@ public class LevelManager : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI timeDisplay;
     [SerializeField] private float timeLength;
-    [SerializeField] private float timer = 0;
+    private float timer = 0;
+    public static float ItemScore = 5;
 
     private LightController lightController;
+
     private void Start() 
     {   
         lightController = GameObject.Find("Lights/Directional Light").GetComponent<LightController>();
         
+        StartCoroutine(lightController.RotateAngleFixedTime(30));
     }
+
     private void Update() 
     {
         if(timer < timeLength ) timer += Time.deltaTime;
@@ -26,18 +30,12 @@ public class LevelManager : MonoBehaviour
             // EventManager.current.LevelEnd();
         }
 
-        //display 
+        //display level time count down
         timeDisplay.text = FormatTime(timeLength - timer);
 
-        //change light direction and angle according to time
-        if(timer < 30f)
-        {
-            lightController.Direction = 20;
-        }
-        else
-        {
-            lightController.Direction = 45;
-        }
+        //light rotate around Y axix constantly
+        lightController.RotateDirFixedTime();
+
     }
 
     private string FormatTime(float time)

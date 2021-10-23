@@ -27,8 +27,8 @@ public class SpotShadowMeshGenerator : MonoBehaviour
         currentLC = currentLight.GetComponent<LightController>();
 
         playerTransform = myPlayerController.gameObject.transform;
-        playerHeight = myPlayerController.Height;
-        playerHalfWidth = myPlayerController.Width / 2;
+        playerHeight = 2;
+        playerHalfWidth = 1;
 
 
         //generate mesh
