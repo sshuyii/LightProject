@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 initialPosition;
     private bool isMoving;
     private bool isGrounded = true;
+    private bool levelEnd;
 
     
 
@@ -121,7 +122,17 @@ public class PlayerController : MonoBehaviour
 
         initialPosition = transform.position;
 
+        //subscribe to events
+        EventManager.current.OnLevelEnd += LevelEnd;
+
         Reset();
+    }
+
+    private void OnDestroy() 
+    {
+        //unsubscribe to events
+        EventManager.current.OnLevelEnd -= LevelEnd;
+
     }
 
     private void Update() 
@@ -237,7 +248,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public void Jump(InputAction.CallbackContext context)
-    {
+    {        
         if(context.performed && isGrounded)
         {                    
             // Debug.Log(context);
@@ -275,7 +286,11 @@ public class PlayerController : MonoBehaviour
 
             Debug.Log("Umbrealla unfold");
         }
+    }
 
+    private void LevelEnd()
+    {
+        
     }
 
 }
